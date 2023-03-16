@@ -2,7 +2,7 @@ module MachineLearningPotential
 
 using Reexport
 
-include("cutoff_func.jl")
+include("Cutoff.jl")
 include("SymmFunc.jl")
 
 # Write your package code here.

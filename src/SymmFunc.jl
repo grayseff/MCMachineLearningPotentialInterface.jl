@@ -1,6 +1,6 @@
 module SymmetryFunctions
 
-using .Cutoff
+using ..Cutoff
 using StaticArrays
 
 

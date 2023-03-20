@@ -4,6 +4,7 @@ using ..Cutoff
 using StaticArrays
 
 export AbstractSymmFunction,AngularSymmFunction,RadialSymmFunction 
+export RadialType2,AngularType3
 
 #----------------------------------------------#
 #---------------Type Definitions---------------#

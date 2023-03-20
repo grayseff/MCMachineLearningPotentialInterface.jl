@@ -34,7 +34,6 @@ function cutoff_function(r_scaled)
     
     cutoff= 0.5*(cos(π*r_scaled) + 1)
     
-
     return cutoff
 end
 cutoff_function(r_ij,r_cut) = cutoff_function(r_ij/r_cut)

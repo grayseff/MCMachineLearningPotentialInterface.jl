@@ -22,6 +22,7 @@ abstract type AngularSymmFunction{T} <: AbstractSymmFunction{T} end
 struct RadialType2{T} <: RadialSymmFunction{T}
     eta::T
     r_cut::T
+    type_vec::Vector
 end
 """
     calc_one_symm_function(r2_ij,eta,r_cut)
@@ -55,6 +56,7 @@ struct AngularType3{T} <:AngularSymmFunction{T}
     lambda::T
     zeta::T
     r_cut::T
+    type_vec::Vector
 end
 """
     calc_one_symm_value(θ,r2_ij,r2_ik,r2_jk,r_cut,η,λ,ζ)
@@ -107,16 +109,25 @@ End-use function for calculating symmetry functions, designed as a curry-functio
 
 """
 function calc_symmetry_function(positions,dis2_mat,index,symmfunc::RadialType2)
-    g = calc_symm_function(dis2_mat,index,symmfunc)
+    if symmfunc.type_vec ==[1,1]
+        g = calc_symm_function(dis2_mat,index,symmfunc)
+    else
+        g=0.
+    end
+
     return g
 end
 function calc_symmetry_function(positions,dis2_mat,index,symmfunc::AngularType3)
-    g = calc_symm_function(positions,dis2_mat,index,symmfunc::AngularType3)
+    if symmfunc.type_vec ==[1,1,1]
+        g = calc_symm_function(positions,dis2_mat,index,symmfunc::AngularType3)
+    else 
+        g = 0.
+    end
+
     return g
 end
 function calc_symmetry_function(positions,dis2_mat,index,symmfunc,g_min,g_max)
     g_unscaled = calc_symmetry_function(positions,dis2_mat,index,symmfunc)
-
     return (g_unscaled - g_min)/(g_max - g_min) 
 end
 

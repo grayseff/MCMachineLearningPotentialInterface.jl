@@ -52,9 +52,9 @@ end
 #------------------------------------------------#
 struct AngularType3{T} <:AngularSymmFunction{T}
     eta::T
-    r_cut::T
     lambda::T
     zeta::T
+    r_cut
 end
 """
     calc_one_symm_value(θ,r2_ij,r2_ik,r2_jk,r_cut,η,λ,ζ)

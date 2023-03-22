@@ -128,7 +128,10 @@ function calc_symmetry_function(positions,dis2_mat,index,symmfunc::AngularType3)
 end
 function calc_symmetry_function(positions,dis2_mat,index,symmfunc,g_min,g_max)
     g_unscaled = calc_symmetry_function(positions,dis2_mat,index,symmfunc)
-    return (g_unscaled - g_min)/(g_max - g_min) 
+    return (g_unscaled - scaledata[1])/(g_max - g_min) 
+end
+function calc_symmetry_function(positions,dis2_mat,index,symmfunc,scaledata::Vector)
+    return calc_symmetry_function(positions,dis2_mat,index,symmfunc,scaledata[1],scaledata[2])
 end
 
 end

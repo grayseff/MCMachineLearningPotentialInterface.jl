@@ -109,7 +109,7 @@ End-use function for calculating symmetry functions, designed as a curry-functio
 
 """
 function calc_symmetry_function(positions,dis2_mat,index,symmfunc::RadialType2)
-    if symmfunc.type_vec ==[1,1]
+    if symmfunc.type_vec == [1.,1.]
         g = calc_symm_function(dis2_mat,index,symmfunc)
     else
         g=0.
@@ -118,7 +118,7 @@ function calc_symmetry_function(positions,dis2_mat,index,symmfunc::RadialType2)
     return g
 end
 function calc_symmetry_function(positions,dis2_mat,index,symmfunc::AngularType3)
-    if symmfunc.type_vec ==[1,1,1]
+    if symmfunc.type_vec == [1.,1.,1.]
         g = calc_symm_function(positions,dis2_mat,index,symmfunc::AngularType3)
     else 
         g = 0.

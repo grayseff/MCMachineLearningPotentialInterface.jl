@@ -3,7 +3,7 @@ module Cutoff
 using LinearAlgebra
 using StaticArrays
 
-export distance2,get_distance2_mat
+export distance2,get_distance2_mat,angular_measure
 export cutoff_function
 
 #----------------------------------------------------------------#
@@ -21,7 +21,20 @@ distance2(a,b) = (a-b)⋅(a-b)
 given a vector called `pos` comprised of (ideally) static vectors we return a lengthXlength symmetric matrix of the squared distance
 """
 get_distance2_mat(pos) = [distance2(a,b) for a in pos, b in pos]
-
+"""
+    angular_measure(a,b,c,r2ij,r2ik)
+    angular_measure(a,b,c)
+angular measure accepts three vectors `a`,`b`,`c` and can either accept or calculate the squared distances between them `r2_ab`,`r2_bc`, centred on vector `a`. Returns cos(θ) labelled as θ: the angular measure.
+"""
+function angular_measure(a,b,c,r2ab,r2ac)
+    θ = (a - b)⋅(a - c)/sqrt(r2ab*r2ac) 
+    return θ
+end
+function angular_measure(a,b,c)
+    r2_ab,r2_ac,r2_bc = distance2(a,b),distance2(a,c),distance2(b,c)
+    θ = angular_measure(a,b,c,r2_ab,r2_ac)   
+    return θ,r2_ab,r2_ac,r2_bc
+end
 #------------------------------------------------------------------#
 #----------------------Type 2 cutoff function----------------------#
 #------------------------------------------------------------------#

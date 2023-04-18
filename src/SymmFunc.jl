@@ -69,6 +69,7 @@ function calc_one_symm_value(θ,r2_ij,r2_ik,r2_jk,r_cut,η,λ,ζ)
     else
         g = (1+λ*θ)^ζ*exp(-η*(r2_ij+r2_ik+r2_jk))*cutoff_function(sqrt(r2_ij)/r_cut)*cutoff_function(sqrt(r2_ik)/r_cut)*cutoff_function(sqrt(r2_jk)/r_cut)
     end
+    
     return g
 end
 """

@@ -123,7 +123,11 @@ scaledata = [1    1        0.450564942      15.523345849       9.298968199
    1   87        0.000000000       0.026092508       0.001908692
    1   88        0.000000000       0.013706197       0.000248299]
 scales = []
+
 for row in eachrow(scaledata)
     g_min,g_max = row[3],row[4]
     push!(scales,[g_min,g_max])
 end
+
+using BenchmarkTools
+

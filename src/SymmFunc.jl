@@ -92,9 +92,21 @@ end
 accepts a vector of `positions` corresponding to a configuration,   `dis2_mat` containing the interatomic distances, `index` corresponding to the central atom and `symmfunc` with the parameters in use. 
 """
 function calc_symm_function(positions,dis2_mat,index,symmfunc::AngularType3)
-    g_vec = [calc_one_symm_func(positions[index],positions[j],positions[k],dis2_mat[index,j],dis2_mat[index,k],dis2_mat[j,k],symmfunc) for j=(1:55) if j !=index for k= 1:j-1 if k != index]
-    g = 2^(1-symmfunc.zeta)*sum(g_vec)
-    return g
+    N = length(positions)
+    g_vec = zeros((N*(N-1)))
+    for j=(1:N)
+        if j != index
+            for k  = (1:j-1)# if k!=index)
+                if k!= index
+                    ind = Int((j^2 - 3j)/2 + 1 + k)
+                    g_vec[ind] = calc_one_symm_func(positions[index],positions[j],positions[k],dis2_mat[index,j],dis2_mat[index,k],dis2_mat[j,k],symmfunc) 
+                end            
+            end
+        end
+    end
+
+    
+    return sum(g_vec)*2^(1-symmfunc.zeta)
 end
 
 #--------------------------------------------------------#

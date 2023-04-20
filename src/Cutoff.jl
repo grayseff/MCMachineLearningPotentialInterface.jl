@@ -49,7 +49,7 @@ function cutoff_function(r_scaled)
     
     return cutoff
 end
-cutoff_function(r_ij,r_cut) = cutoff_function(r_ij/r_cut)
+cutoff_function(r_ij,r_cut) = ifelse(r_ij<r_cut ,cutoff_function(r_ij/r_cut),0.)
 
 
 end

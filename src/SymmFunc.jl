@@ -111,7 +111,7 @@ end
 
 #--------------------------------------------------------#
 #-------------------Combined function--------------------#
-#--------------------------------------------------------#\
+#--------------------------------------------------------#
 """
     calc_symmetry_function(positions,dis2_mat,index,symmfunc::RadialType2)
     calc_symmetry_function(positions,dis2_mat,index,symmfunc::AngularType3)

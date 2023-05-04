@@ -57,6 +57,11 @@ struct AngularType3{T} <:AngularSymmFunction{T}
     zeta::T
     r_cut::T
     type_vec::Vector
+    tpz::T
+end
+function AngularType3(eta,lambda,zeta,r_cut,type_vec::Vector)
+    tpz = 2.0^(1-zeta)
+    return AngularType3(eta,lambda,zeta,r_cut,type_vec,tpz)
 end
 """
     calc_one_symm_value(θ,r2_ij,r2_ik,r2_jk,r_cut,η,λ,ζ)

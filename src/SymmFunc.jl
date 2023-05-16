@@ -5,7 +5,7 @@ using StaticArrays
 
 export AbstractSymmFunction,AngularSymmFunction,RadialSymmFunction 
 export RadialType2,AngularType3
-export calc_symmetry_function
+export calc_one_symm_val,calc_symm_vals!,update_g_vals!
 
 #----------------------------------------------#
 #---------------Type Definitions---------------#
@@ -16,7 +16,7 @@ abstract type RadialSymmFunction{T} <: AbstractSymmFunction{T} end
 abstract type AngularSymmFunction{T} <: AbstractSymmFunction{T} end
 
 #------------------------------------------------#
-#--------------Type 2 symm function--------------#
+#-------------Symm Func Definitions--------------#
 #------------------------------------------------#
 
 struct RadialType2{T} <: RadialSymmFunction{T}
@@ -24,33 +24,7 @@ struct RadialType2{T} <: RadialSymmFunction{T}
     r_cut::T
     type_vec::Vector
 end
-"""
-    calc_one_symm_function(r2_ij,eta,r_cut)
-Accepts interatomic distance squared `r2_ij`, gaussian parameter `η` and cutoff distance `r_cut` it then calculates the radial symmetry function value for a single pair of atoms.
-"""
-function calc_one_symm_function(r2_ij,η,r_cut)
-    if r2_ij != 0 && r2_ij < r_cut^2 
-        g_ij = exp(-η*(r2_ij)) * cutoff_function( sqrt(r2_ij)/r_cut )
-        return g_ij
-    else
-        return 0.
-    end
-end
-"""
-    calc_symm_function(dist2_matrix,index,symmfunc::RadialType2)
-calculate the total symmetry function value `G` centred on atom `index` by iterating over the interatomic distances in `dis2_mat` using the symmetry parameters contained in `symmfunc`. 
-"""
-function calc_symm_function(dist2_matrix,index,symmfunc::RadialType2)
-    eta = symmfunc.eta
-    r_cut = symmfunc.r_cut    
-    gvec = calc_one_symm_function.(dist2_matrix[:,index],eta,r_cut)
-    return sum(gvec)   
-end
 
-
-#------------------------------------------------#
-#--------------Type 3 symm function--------------#
-#------------------------------------------------#
 struct AngularType3{T} <:AngularSymmFunction{T}
     eta::T
     lambda::T
@@ -66,93 +40,93 @@ function AngularType3{T}(eta,lambda,zeta,r_cut,type_vec::Vector) where {T}
 
     return AngularType3(eta,lambda,zeta,r_cut,type_vec,tpz)
 end
+
+#------------------------------------------------------------------#
+#-------------------Calculating One Symm Val-----------------------#
+#------------------------------------------------------------------#
 """
-    calc_one_symm_value(θ,r2_ij,r2_ik,r2_jk,r_cut,η,λ,ζ)
-returns a single symmetry function value from the double-sum. accepts `θ` the angle between ijk centred on i, and the squared distances `r2_ij`,`r2_ik`, `r2_jk` along with the symmetry funciton parameters `η`,`λ`,`ζ`, and the cutoff radius `r_cut`.
+    calc_one_symm_val(r2_ij,fc_ij,η)
+Accepts interatomic distance squared `r2_ij`, the cutoff function 'fc_ij' and a gaussian parameter `η`  it then calculates the radial symmetry function value for a single pair of atoms.
+    calc_one_symm_val(θ,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
+    (position1,position2,position3,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
+
+returns a single symmetry function value from the double-sum. accepts `θ` the angle between ijk centred on i, and the squared distances `r2_ij`,`r2_ik`, `r2_jk`, the cutoff function values `f_ij,f_ik,f_jk` along with the symmetry funciton parameters `η`,`λ`,`ζ`, and the cutoff radius `r_cut`.
+
+The version with `position_i` calculates the angle between positions before calculating the symmetry functions according to the previous method.  
 """
-function calc_one_symm_value(θ,r2_ij,r2_ik,r2_jk,r_cut,η,λ,ζ)
-    d_cut=r_cut^2
-    if r2_ij > d_cut || r2_ik > d_cut || r2_jk > d_cut 
-        g = 0.
-    else
-        g = (1+λ*θ)^ζ*exp(-η*(r2_ij+r2_ik+r2_jk))*cutoff_function(sqrt(r2_ij)/r_cut)*cutoff_function(sqrt(r2_ik)/r_cut)*cutoff_function(sqrt(r2_jk)/r_cut)
-    end
-    
+calc_one_symm_val(r2_ij,fc_ij,η) = ifelse(fc_ij!=0. && fc_ij!=1., fc_ij*exp(-η*r2_ij), 0.)
+
+function calc_one_symm_val(θ,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
+   
+    g= (1+λ*θ)^ζ * exp(-η*(r2_ij+r2_ik+r2_jk)) * f_ij * f_ik * f_jk
+
     return g
 end
-"""
-    calc_one_symm_func(position1,position2,position3,symmfunc)
-    calc_one_symm_func(position1,position2,position3,r2_ij,r2_ik,r2_jk,symmfunc)
-function to calculate the symmetry function value with parameters in `symmfunc` of a single triplet of atoms at `position1` `position2` `position3` centred on position 1. The first method calculates the interatomic distances `r2_ij`,`r2_ik`,`r2_jk` and cosθ labelled as `θ`, returning `g` and the distances, the second accepts these as arguments and only returns `g`.
-"""
-function calc_one_symm_func(position1,position2,position3,symmfunc::AngularType3)
-    θ,r2_ij,r2_ik,r2_jk = angular_measure(position1,position2,position3)
-    g = calc_one_symm_value(θ,r2_ij,r2_ik,r2_jk,symmfunc.r_cut,symmfunc.eta,symmfunc.lambda,symmfunc.zeta)
-    return g,r2_ij,r2_ik,r2_jk
+function calc_one_symm_val(position1,position2,position3,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
+        θ = angular_measure(position1,position2,position3,r2_ij,r2_ik)
+
+    return calc_one_symm_val(θ,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
 end
-function calc_one_symm_func(position1,position2,position3,r2_ij,r2_ik,r2_jk,symmfunc::AngularType3)
-    θ = angular_measure(position1,position2,position3,r2_ij,r2_ik)
-    g = calc_one_symm_value(θ,r2_ij,r2_ik,r2_jk,symmfunc.r_cut,symmfunc.eta,symmfunc.lambda,symmfunc.zeta)
-    return g
+
+#----------------------------------------------------------------#
+#------------------Total Symmetry Calculation--------------------#
+#----------------------------------------------------------------#
+"""
+    update_g_vals!(g_vec,g_val,index1,index2,index3)
+Input is the current `g_vec`tor, the `g_val`ue to update and the locations `index_i` to update. 
+"""
+function update_g_vals!(g_vec,g_val,index1,index2,index3)
+    g_vec[index1] += g_val
+    g_vec[index2] += g_val
+    g_vec[index3] += g_val
+
+    return g_vec
 end
+""" 
+    calc_symm_vals!(positions,dist2_mat,f_mat,g_vec,symm_func::RadialType2)
+Accepts `positions` for consistency with angular calculation, `dist2_mat` and `f_mat` containing the distances and cutoff functions relevant to the symmetry values, lastly accepts the symmetry function over which to iterate. `g_vec` is an N_atom vector into which the total contributions of each atom are inputted. Returns the same vector. 
 """
-    calc_symmetry_function(positions,dis2_mat,index,symmfunc::AngularType3)
-accepts a vector of `positions` corresponding to a configuration,   `dis2_mat` containing the interatomic distances, `index` corresponding to the central atom and `symmfunc` with the parameters in use. 
-"""
-function calc_symm_function(positions,dis2_mat,index,symmfunc::AngularType3)
-    N = length(positions)
-    g_vec = zeros((N*(N-1)))
-    for j=(1:N)
-        if j != index
-            for k  = (1:j-1)# if k!=index)
-                if k!= index
-                    ind = Int((j^2 - 3j)/2 + 1 + k)
-                    g_vec[ind] = calc_one_symm_func(positions[index],positions[j],positions[k],dis2_mat[index,j],dis2_mat[index,k],dis2_mat[j,k],symmfunc) 
-                end            
+function calc_symm_vals!(positions,dist2_mat,f_mat,g_vec,symm_func::RadialType2)
+    N=length(g_vec)
+    if symm_func.type_vec == [1.,1.]
+        
+        for atomindex in eachindex(g_vec)
+            for index2 in (atomindex+1):N
+                g_val =  calc_one_symm_val(dist2_mat[atomindex,index2],f_mat[atomindex,index2],symm_func.eta)
+                g_vec[atomindex] += g_val 
+                g_vec[index2] += g_val
             end
         end
-    end
-
-    
-    return sum(g_vec)*2^(1-symmfunc.zeta)
-end
-
-#--------------------------------------------------------#
-#-------------------Combined function--------------------#
-#--------------------------------------------------------#
-"""
-    calc_symmetry_function(positions,dis2_mat,index,symmfunc::RadialType2)
-    calc_symmetry_function(positions,dis2_mat,index,symmfunc::AngularType3)
-    calc_symmetry_function(positions,dis2_mat,index,symmfunc,g_min,g_max)
-End-use function for calculating symmetry functions, designed as a curry-function to ensure the correct method is called with unchanged input. accepts a vector `positions` a matrix `dis2_mat` of square distances, the `index` of the atom about which we calculate and the `symmfunc` containing the parameters. 
-
-    -optional inclusion of `g_max` `g_min` designed to rescale the symmetry function to ensure g∈[0,1] 
-
-"""
-function calc_symmetry_function(positions,dis2_mat,index,symmfunc::RadialType2)
-    if symmfunc.type_vec == [1.,1.]
-        g = calc_symm_function(dis2_mat,index,symmfunc)
     else
-        g=0.
+        g_vec = zeros(N)
     end
 
-    return g
+    return g_vec
 end
-function calc_symmetry_function(positions,dis2_mat,index,symmfunc::AngularType3)
-    if symmfunc.type_vec == [1.,1.,1.]
-        g = calc_symm_function(positions,dis2_mat,index,symmfunc::AngularType3)
-    else 
-        g = 0.
+
+function calc_symm_vals!(positions,dist2_mat,f_mat,g_vec,symm_func::AngularType3)
+    N = length(g_vec)
+    η,λ,ζ = symm_func.eta,symm_func.lambda,symm_func.zeta
+    if symm_func.type_vec == [1.,1.,1.]
+        for atomindex in eachindex(g_vec)
+            for index2 in (atomindex+1):N
+                for index3 in (index2+1):N
+
+                    g_val=calc_one_symm_val(positions[atomindex],positions[index2],positions[index3],dist2_mat[atomindex,index2],dist2_mat[atomindex,index3],dist2_mat[index2,index3],f_mat[atomindex,index2],f_mat[atomindex,index3],f_mat[index2,index3],η,λ,ζ)
+
+                    g_vec = update_g_vals!(g_vec,g_val,atomindex,index2,index3)
+
+                end
+            end
+        end
+    else
+        g_vec = zeros(N)
     end
 
-    return g
+
+    return symm_func.tpz*g_vec
 end
-function calc_symmetry_function(positions,dis2_mat,index,symmfunc,g_min,g_max)
-    g_unscaled = calc_symmetry_function(positions,dis2_mat,index,symmfunc)
-    return (g_unscaled - g_min)/(g_max - g_min) 
-end
-function calc_symmetry_function(positions,dis2_mat,index,symmfunc,scaledata::Vector)
-    return calc_symmetry_function(positions,dis2_mat,index,symmfunc,scaledata[1],scaledata[2])
-end
+
+
 
 end

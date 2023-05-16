@@ -40,8 +40,9 @@ end
 #------------------------------------------------------------------#
 """
     cutoff_function(r_scaled)
-    cutoff_function(r_ij,r_cut)
-Implementation of the type 2 cutoff function. Either accepts scaled radius `r_scaled` or the interatomiic distance `r_ij` and the cutoff radius `r_cut`. Calculation is described in the RuNNer documentation, given as 1/2 (cos(πx) + 1) where x is (r_ij - r_i,c)/(rc - r_i,c). As an inner cutoff is not used by the potentials we are interested in, we have not included a method. 
+    (r_ij,r_cut)
+    (dist_vec::T,r_cut) where {T<:Array}
+Implementation of the type 2 cutoff function. Either accepts scaled radius `r_scaled` or the interatomiic distance `r_ij` and the cutoff radius `r_cut`. Calculation is described in the RuNNer documentation, given as 1/2 (cos(πx) + 1) where x is (r_ij - r_i,c)/(rc - r_i,c). As an inner cutoff is not used by the potentials we are interested in, we have not included a method. A third method is included for creating a matrix or vector to match the distances provided. 
 """
 function cutoff_function(r_scaled)
     
@@ -49,7 +50,10 @@ function cutoff_function(r_scaled)
     
     return cutoff
 end
-cutoff_function(r_ij,r_cut) = ifelse(r_ij<r_cut ,cutoff_function(r_ij/r_cut),0.)
+cutoff_function(r_ij::Float64,r_cut) = ifelse(r_ij<r_cut ,cutoff_function(r_ij/r_cut),0.)
 
+function cutoff_function(dist_vec::T,r_cut) where {T<:Array} 
+    return cutoff_function.(sqrt.(dist_vec),Ref(r_cut))
+end
 
 end

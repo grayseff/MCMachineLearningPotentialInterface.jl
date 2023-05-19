@@ -6,6 +6,7 @@ using StaticArrays
 export AbstractSymmFunction,AngularSymmFunction,RadialSymmFunction 
 export RadialType2,AngularType3
 export calc_one_symm_val,calc_symm_vals!,update_g_vals!
+export total_symm_calc
 
 #----------------------------------------------#
 #---------------Type Definitions---------------#

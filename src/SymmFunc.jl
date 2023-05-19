@@ -144,7 +144,7 @@ Function to run over a vector of symmetry functions `total_symm_vec` and determi
 """
 function total_symm_calc(positions,dist2_mat,f_mat,total_symm_vec)
     g_mat = init_symm_vecs(dist2_mat,total_symm_vec)
-    for g_index in eachindex(total_symm_vec)
+    Threads.@threads for g_index in eachindex(total_symm_vec)
         g_mat[g_index,:] = calc_symm_vals!(positions,dist2_mat,f_mat,g_mat[g_index,:],total_symm_vec[g_index])
     end
     

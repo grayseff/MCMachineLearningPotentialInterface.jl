@@ -46,6 +46,40 @@ end
 #-------------------Calculating One Symm Val-----------------------#
 #------------------------------------------------------------------#
 """
+    exponential_part(η,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk)
+calculates the exponential portion of the symmetry function for the angular symmetry function. Preserves the values we can maintain throughout iterating over theta
+"""
+exponential_part(η,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk) = exp(-η*(r2_ij+r2_ik+r2_jk))* f_ij * f_ik * f_jk
+"""
+    theta_part(θ,λ,ζ)
+Calculates the angular portion of a single symmetry function, this requires iteration over each of the three angles.
+"""
+theta_part(θ,λ,ζ) = (1+λ*θ)^ζ
+"""
+    symmfunc_calc(θ_vec,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
+Calculates the three g_values corresponding to the three atoms iterated over, builds the foundation of the total symm function as calculated below.
+"""
+function symmfunc_calc(θ_vec,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
+
+    exp_part = exponential_part(η,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk)
+    g_values = [exp_part* theta_part(θ,λ,ζ) for θ in θ_vec]
+    
+    return g_values
+end
+"""
+    update_g_vals!(g_vec,g_vals,atomindex,index2,index3)
+function to correctly update the symmvalues 'g_vals' at the indices in 'g_vec'
+ """
+function update_g_vals!(g_vec,g_vals,atomindex,index2,index3)
+
+    g_vec[atomindex] += g_vals[1]
+    g_vec[index2] += g_vec[2]
+    g_vec[index3] += g_vals[3]
+    
+    return g_vec
+end
+
+"""
     calc_one_symm_val(r2_ij,fc_ij,η)
 Accepts interatomic distance squared `r2_ij`, the cutoff function 'fc_ij' and a gaussian parameter `η`  it then calculates the radial symmetry function value for a single pair of atoms.
     calc_one_symm_val(θ,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
@@ -57,32 +91,19 @@ The version with `position_i` calculates the angle between positions before calc
 """
 calc_one_symm_val(r2_ij,fc_ij,η) = ifelse(fc_ij!=0. && fc_ij!=1., fc_ij*exp(-η*r2_ij), 0.)
 
-function calc_one_symm_val(θ,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
-   
-    g= (1+λ*θ)^ζ * exp(-η*(r2_ij+r2_ik+r2_jk)) * f_ij * f_ik * f_jk
 
-    return g
-end
 function calc_one_symm_val(position1,position2,position3,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
-        θ = angular_measure(position1,position2,position3,r2_ij,r2_ik)
+    θ_vec = all_angular_measure(position1,position2,position3,r2_ij,r2_ik,r2_jk)
+    
+    g_vals = symmfunc_calc(θ_vec,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
 
-    return calc_one_symm_val(θ,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
+    return g_vals
 end
 
 #----------------------------------------------------------------#
 #------------------Total Symmetry Calculation--------------------#
 #----------------------------------------------------------------#
-"""
-    update_g_vals!(g_vec,g_val,index1,index2,index3)
-Input is the current `g_vec`tor, the `g_val`ue to update and the locations `index_i` to update. 
-"""
-function update_g_vals!(g_vec,g_val,index1,index2,index3)
-    g_vec[index1] += g_val
-    g_vec[index2] += g_val
-    g_vec[index3] += g_val
 
-    return g_vec
-end
 """ 
     calc_symm_vals!(positions,dist2_mat,f_mat,g_vec,symm_func::RadialType2)
 Accepts `positions` for consistency with angular calculation, `dist2_mat` and `f_mat` containing the distances and cutoff functions relevant to the symmetry values, lastly accepts the symmetry function over which to iterate. `g_vec` is an N_atom vector into which the total contributions of each atom are inputted. Returns the same vector. 
@@ -114,10 +135,11 @@ function calc_symm_vals!(positions,dist2_mat,f_mat,g_vec,symm_func::AngularType3
             for index2 in (atomindex+1):N
                 for index3 in (index2+1):N
 
-                    g_val=calc_one_symm_val(positions[atomindex],positions[index2],positions[index3],dist2_mat[atomindex,index2],dist2_mat[atomindex,index3],dist2_mat[index2,index3],f_mat[atomindex,index2],f_mat[atomindex,index3],f_mat[index2,index3],η,λ,ζ)
-                    g_val *= symm_func.tpz 
-                    g_vec = update_g_vals!(g_vec,g_val,atomindex,index2,index3)
-
+                    g_vals=calc_one_symm_val(positions[atomindex],positions[index2],positions[index3],dist2_mat[atomindex,index2],dist2_mat[atomindex,index3],dist2_mat[index2,index3],f_mat[atomindex,index2],f_mat[atomindex,index3],f_mat[index2,index3],η,λ,ζ)
+                    
+                    g_vals *= symm_func.tpz 
+                    
+                    g_vec = update_g_vals!(g_vec,g_vals,atomindex,index2,index3)
                 end
             end
         end

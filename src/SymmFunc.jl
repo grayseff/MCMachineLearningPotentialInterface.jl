@@ -73,7 +73,7 @@ function to correctly update the symmvalues 'g_vals' at the indices in 'g_vec'
 function update_g_vals!(g_vec,g_vals,atomindex,index2,index3)
 
     g_vec[atomindex] += g_vals[1]
-    g_vec[index2] += g_vec[2]
+    g_vec[index2] += g_vals[2]
     g_vec[index3] += g_vals[3]
     
     return g_vec
@@ -136,8 +136,8 @@ function calc_symm_vals!(positions,dist2_mat,f_mat,g_vec,symm_func::AngularType3
                 for index3 in (index2+1):N
 
                     g_vals=calc_one_symm_val(positions[atomindex],positions[index2],positions[index3],dist2_mat[atomindex,index2],dist2_mat[atomindex,index3],dist2_mat[index2,index3],f_mat[atomindex,index2],f_mat[atomindex,index3],f_mat[index2,index3],η,λ,ζ)
-                    
-                    g_vals *= symm_func.tpz 
+
+                    g_vals .*= symm_func.tpz 
                     
                     g_vec = update_g_vals!(g_vec,g_vals,atomindex,index2,index3)
                 end
@@ -169,6 +169,7 @@ Function to run over a vector of symmetry functions `total_symm_vec` and determi
 """
 function total_symm_calc(positions,dist2_mat,f_mat,total_symm_vec)
     g_mat = init_symm_vecs(dist2_mat,total_symm_vec)
+
      for g_index in eachindex(total_symm_vec)
         g_mat[g_index,:] = calc_symm_vals!(positions,dist2_mat,f_mat,g_mat[g_index,:],total_symm_vec[g_index])
     end

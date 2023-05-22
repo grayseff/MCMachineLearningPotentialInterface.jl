@@ -109,23 +109,26 @@ function calc_symm_vals!(positions,dist2_mat,f_mat,g_vec,symm_func::AngularType3
     N = length(g_vec)
     η,λ,ζ = symm_func.eta,symm_func.lambda,symm_func.zeta
     if symm_func.type_vec == [1.,1.,1.]
+
         for atomindex in eachindex(g_vec)
             for index2 in (atomindex+1):N
                 for index3 in (index2+1):N
 
                     g_val=calc_one_symm_val(positions[atomindex],positions[index2],positions[index3],dist2_mat[atomindex,index2],dist2_mat[atomindex,index3],dist2_mat[index2,index3],f_mat[atomindex,index2],f_mat[atomindex,index3],f_mat[index2,index3],η,λ,ζ)
-
+                    g_val *= symm_func.tpz 
                     g_vec = update_g_vals!(g_vec,g_val,atomindex,index2,index3)
 
                 end
             end
         end
+        
     else
         g_vec = zeros(N)
     end
 
 
-    return symm_func.tpz*g_vec
+    return g_vec
+
 end
 #-----------------------------------------------------------------#
 #--------------------Calculate Symmetry Matrix--------------------#

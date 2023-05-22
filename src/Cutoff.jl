@@ -3,7 +3,7 @@ module Cutoff
 using LinearAlgebra
 using StaticArrays
 
-export distance2,get_distance2_mat,angular_measure
+export distance2,get_distance2_mat,angular_measure,all_angular_measure
 export cutoff_function
 
 #----------------------------------------------------------------#
@@ -34,6 +34,12 @@ function angular_measure(a,b,c)
     r2_ab,r2_ac,r2_bc = distance2(a,b),distance2(a,c),distance2(b,c)
     θ = angular_measure(a,b,c,r2_ab,r2_ac)   
     return θ,r2_ab,r2_ac,r2_bc
+end
+
+function all_angular_measure(a,b,c,r2ab,r2ac,r2bc)
+    θ_vec = [angular_measure(a,b,c,r2ab,r2ac),angular_measure(b,a,c,r2ab,r2bc),angular_measure(c,a,b,r2ac,r2bc)]
+    
+    return θ_vec
 end
 #------------------------------------------------------------------#
 #----------------------Type 2 cutoff function----------------------#

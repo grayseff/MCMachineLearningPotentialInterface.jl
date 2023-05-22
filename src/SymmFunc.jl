@@ -208,7 +208,7 @@ function calc_symm_vals!(positions,new_pos,new_dis_vec,new_f_vec,atomindex,dist2
     N = length(g_vec)
     η,λ,ζ = symm_func.eta,symm_func.lambda,symm_func.zeta
     if symm_func.type_vec == [1.,1.,1.]
-        Threads.@threads for index2 = 1:N
+        for index2 = 1:N
             if index2 != atomindex
                 for index3=index2+1:N
                     if index3 != atomindex
@@ -234,7 +234,7 @@ end
 Parallelised code to update the total symmetry matrix `g_mat.` Assuming the former positions, distances and cutoffs `positions,dist2_mat,f_mat` and new positions and vectors `new_pos,new_dist_vec,new_f_vec`. Iterates over each symmetry function in `total_symm_vec.` Passes the indexed vector of `g_mat` iteratively to the calc_symm_vals function in a threaded fashion. 
 """
 function total_symm_calc(positions,new_pos,dist2_mat,new_dist_vec,f_mat,new_f_vec,g_mat,atomindex,total_symm_vec)
-    for g_index in eachindex(total_symm_vec)
+    Threads.@threads for g_index in eachindex(total_symm_vec)
         g_mat[g_index,:] = calc_symm_vals!(positions,new_pos,new_dist_vec,new_f_vec,atomindex,dist2_mat,f_mat,g_mat[g_index,:],total_symm_vec[g_index])
     end
     return g_mat

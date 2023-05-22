@@ -36,10 +36,13 @@ function angular_measure(a,b,c)
     return θ,r2_ab,r2_ac,r2_bc
 end
 
+thetacalc(xy,xz,disxy,disxz) = xy⋅xz/(disxy*disxz)
 function all_angular_measure(a,b,c,r2ab,r2ac,r2bc)
-    θ_vec = [angular_measure(a,b,c,r2ab,r2ac),angular_measure(b,a,c,r2ab,r2bc),angular_measure(c,a,b,r2ac,r2bc)]
-    
-    return θ_vec
+    ab,ac,bc = (a-b),(a-c),(b-c)
+    dis2ab,dis2ac,dis2bc = sqrt(r2ab),sqrt(r2ac),sqrt(r2bc)
+    thetavec = [thetacalc(ab,ac,dis2ab,dis2ac),thetacalc(-ab,bc,dis2ab,dis2bc),thetacalc(-ab,-bc,dis2ac,dis2bc) ] 
+
+    return thetavec
 end
 #------------------------------------------------------------------#
 #----------------------Type 2 cutoff function----------------------#

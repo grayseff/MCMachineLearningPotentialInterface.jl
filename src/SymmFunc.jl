@@ -127,10 +127,9 @@ function calc_symm_vals!(positions,dist2_mat,f_mat,g_vec,symm_func::RadialType2)
 end
 
 function calc_symm_vals!(positions,dist2_mat,f_mat,g_vec,symm_func::AngularType3)
-    N = length(g_vec)
-    η,λ,ζ = symm_func.eta,symm_func.lambda,symm_func.zeta
+    N = length(g_vec)  
     if symm_func.type_vec == [1.,1.,1.]
-
+        η,λ,ζ = symm_func.eta,symm_func.lambda,symm_func.zeta
         for atomindex in eachindex(g_vec)
             for index2 in (atomindex+1):N
                 for index3 in (index2+1):N

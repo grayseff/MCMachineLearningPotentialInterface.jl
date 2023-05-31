@@ -52,7 +52,7 @@ function AngularType3{T}(eta,lambda,zeta,r_cut,type_vec::Vector) where {T}
     tpz = 2.0^(1-zeta)
     return AngularType3(eta,lambda,zeta,r_cut,type_vec,tpz,0.)
 end
-function AngularType3{T}(eta,lambda,zeta,r_cut,type_vector::Vector,G_vals::Vector)
+function AngularType3{T}(eta,lambda,zeta,r_cut,type_vector::Vector,G_vals::Vector) where {T}
     G_norm = 1/(G_vals[1] - G_vals[2])
     G_offset = -G_vals[1]*G_norm
     tpz = 2.0^(1-zeta)*G_offset

@@ -27,6 +27,11 @@ struct RadialType2{T} <: RadialSymmFunction{T}
     G_offset::T
     G_norm::T
 end
+"""
+    RadialType2{T}(eta,r_cut,type_vector) where {T}
+    RadialType2{T}(eta,r_cut,type_vector::Vector,G_vals::Vector) where {T}
+Various definitions of the RadialType2 struct to account for new normalisation factors required by the neural network to simplify the math. One only accepts the standard hyperparameters trained by the neural network and sets the offset and normalisation factors to zero and one respectively. The other accepts G_min,G_max and calculates the normalisation and offset manually
+"""
 function RadialType2{T}(eta,r_cut,type_vector) where {T}
     return RadialType2(eta,r_cut,type_vector,0.,1.)
 end
@@ -47,7 +52,12 @@ struct AngularType3{T} <:AngularSymmFunction{T}
     #G_norm::T
     
 end
-
+"""
+    AngularType3{T}(eta,lambda,zeta,r_cut,type_vec::Vector) where {T}
+    AngularType3{T}(eta,lambda,zeta,r_cut,type_vector::Vector,G_vals::Vector) where {T}
+Functions to initialise the AngularType3 structs based on various different definitions. If we don't include the offset and normalisation factors the two power of (one minus) zeta factor inlcudes no normalisation, and the offset is zero. 
+Second definition includes a vector containing G_max and G_min in a vector, it sets the offset and renormalises tpz to include G_norm. 
+"""
 function AngularType3{T}(eta,lambda,zeta,r_cut,type_vec::Vector) where {T}
     tpz = 2.0^(1-zeta)
     return AngularType3(eta,lambda,zeta,r_cut,type_vec,tpz,0.)
@@ -105,7 +115,7 @@ returns a single symmetry function value from the double-sum. accepts `θ` the a
 
 The version with `position_i` calculates the angle between positions before calculating the symmetry functions according to the previous method.  
 """
-calc_one_symm_val(r2_ij,fc_ij,η) = ifelse(fc_ij!=0. && fc_ij!=1., fc_ij*exp(-η*r2_ij), 0.)
+calc_one_symm_val(r2_ij,fc_ij,g_norm,η) = ifelse(fc_ij!=0. && fc_ij!=1., fc_ij*exp(-η*r2_ij)*g_norm, 0.)
 
 
 function calc_one_symm_val(position1,position2,position3,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk,η,λ,ζ)
@@ -127,19 +137,21 @@ Accepts `positions` for consistency with angular calculation, `dist2_mat` and `f
 function calc_symm_vals!(positions,dist2_mat,f_mat,g_vec,symm_func::RadialType2)
     N=length(g_vec)
     if symm_func.type_vec == [1.,1.]
-        
+        g_norm,η =  symm_func.G_norm,symm_func.eta
         for atomindex in eachindex(g_vec)
             for index2 in (atomindex+1):N
-                g_val =  calc_one_symm_val(dist2_mat[atomindex,index2],f_mat[atomindex,index2],symm_func.eta)
+                g_val =  calc_one_symm_val(dist2_mat[atomindex,index2],f_mat[atomindex,index2],g_norm,η)
                 g_vec[atomindex] += g_val 
                 g_vec[index2] += g_val
             end
         end
+
+        return g_vec .+ symm_func.G_offset
     else
-        g_vec = zeros(N)
+        return zeros(N)
     end
 
-    return g_vec
+    
 end
 
 function calc_symm_vals!(positions,dist2_mat,f_mat,g_vec,symm_func::AngularType3)
@@ -158,13 +170,14 @@ function calc_symm_vals!(positions,dist2_mat,f_mat,g_vec,symm_func::AngularType3
                 end
             end
         end
+        return g_vec .+ symm_func.G_offset
         
     else
-        g_vec = zeros(N)
+       return zeros(N)
     end
 
 
-    return g_vec
+    
 
 end
 #-----------------------------------------------------------------#

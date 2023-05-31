@@ -5,6 +5,7 @@ using StaticArrays
 
 export AbstractSymmFunction,AngularSymmFunction,RadialSymmFunction 
 export RadialType2,AngularType3
+export exponential_part,theta_part
 export calc_one_symm_val,calc_symm_vals!,update_g_vals!
 export total_symm_calc
 
@@ -73,9 +74,11 @@ end
 #------------------------------------------------------------------#
 """
     exponential_part(η,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk)
-calculates the exponential portion of the symmetry function for the angular symmetry function. Preserves the values we can maintain throughout iterating over theta
+    exponential_part(η,rsum,f_prod)
+calculates the exponential portion of the symmetry function for the angular symmetry function. Preserves the values we can maintain throughout iterating over theta. Second method simply reduces the inputs to what is actually required. 
 """
 exponential_part(η,r2_ij,r2_ik,r2_jk,f_ij,f_ik,f_jk) = exp(-η*(r2_ij+r2_ik+r2_jk))* f_ij * f_ik * f_jk
+exponential_part(η,rsum,f_prod) = exp(-η*(rsum))*f_prod
 """
     theta_part(θ,λ,ζ)
 Calculates the angular portion of a single symmetry function, this requires iteration over each of the three angles.

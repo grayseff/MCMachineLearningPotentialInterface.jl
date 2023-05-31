@@ -32,7 +32,7 @@ function RadialType2{T}(eta,r_cut,type_vector) where {T}
 end
 function RadialType2{T}(eta,r_cut,type_vector::Vector,G_vals::Vector) where {T}
     G_norm = 1/(G_vals[1] - G_vals[2])
-    G_offset = -G_vals[1]*G_norm
+    G_offset = -G_vals[2]*G_norm
     return RadialType2(eta,r_cut,type_vector,G_offset,G_norm)
 end
 
@@ -54,7 +54,7 @@ function AngularType3{T}(eta,lambda,zeta,r_cut,type_vec::Vector) where {T}
 end
 function AngularType3{T}(eta,lambda,zeta,r_cut,type_vector::Vector,G_vals::Vector) where {T}
     G_norm = 1/(G_vals[1] - G_vals[2])
-    G_offset = -G_vals[1]*G_norm
+    G_offset = -G_vals[2]*G_norm
     tpz = 2.0^(1-zeta)*G_norm
     return AngularType3(eta,lambda,zeta,r_cut,type_vector,tpz,G_offset)
 end

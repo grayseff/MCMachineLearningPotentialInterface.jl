@@ -207,6 +207,18 @@ function total_symm_calc(positions,dist2_mat,f_mat,total_symm_vec)
     
     return g_mat
 end
+"""
+    total_thr_symm_calc(positions,dist2_mat,f_mat,total_symm_vec)
+This operates as the total_symm_calc function only threaded over the symmetry functions. 
+"""
+function total_thr_symm_calc(positions,dist2_mat,f_mat,total_symm_vec)
+    g_mat = init_symm_vecs(dist2_mat,total_symm_vec)
 
+    Threads.@threads for g_index in eachindex(total_symm_vec)
+        g_mat[g_index,:] = calc_symm_vals!(positions,dist2_mat,f_mat,g_mat[g_index,:],total_symm_vec[g_index])
+    end
+    
+    return g_mat
+end
 
 end

@@ -7,7 +7,7 @@ export AbstractSymmFunction,AngularSymmFunction,RadialSymmFunction
 export RadialType2,AngularType3
 export exponential_part,theta_part
 export calc_one_symm_val,calc_symm_vals!,update_g_vals!
-export total_symm_calc
+export total_symm_calc,total_thr_symm_calc
 
 #------------------------------------------------#
 #----------------Type Definitions----------------#

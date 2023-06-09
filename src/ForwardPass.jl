@@ -30,9 +30,9 @@ end
 calls the RuNNer forward pass module written by A. Knoll located in `directory`. This self-defines the `eatoms` output, a vector of the atomic energies. `batchsize` is based on the number of atoms whose energies we want to determine. The remaining inputs are contained in `nnparams.` Details of this struct can be found in the definition of the NeuralNetworkPotential struct. 
 The last two definitions are identical except eatoms is an input rather than a vector determined during the calculation. This can save memory in the long run. 
 """
-function forward_pass( input::AbstractArray, batchsize, num_layers, num_nodes, activation_functions, num_parameters, parameters, directory)    
+function forward_pass( input::AbstractArray, batchsize, num_layers, num_nodes, activation_functions, num_parameters, parameters)    
     eatom = Vector{Float64}(undef,batchsize)
-    ccall( (:forward, "$(directory)/librunnerjulia.so"),
+    ccall( (:forward, "./librunnerjulia.so"),
     Float64,  (Ref{Float64},Ref{Int32}, Ref{Int32}, Ref{Int32}, Ref{Int32},
     Ref{Int32}, Ref{Float64}, Ref{Int32}, Ref{Float64}),
     input, num_nodes[1], num_layers, num_nodes, batchsize,
@@ -40,14 +40,14 @@ function forward_pass( input::AbstractArray, batchsize, num_layers, num_nodes, a
     )
     return eatom
 end
-function forward_pass(input::AbstractArray,batchsize,nnparams::NeuralNetworkPotential; directory = pwd())   
-    return forward_pass(input, batchsize, nnparams.n_layers, nnparams.num_nodes, nnparams.activation_functions,nnparams.n_params, nnparams.parameters,directory)
+function forward_pass(input::AbstractArray,batchsize,nnparams::NeuralNetworkPotential)   
+    return forward_pass(input, batchsize, nnparams.n_layers, nnparams.num_nodes, nnparams.activation_functions,nnparams.n_params, nnparams.parameters)
 end
-function forward_pass(eatom,input::AbstractArray,batchsize,nnparams::NeuralNetworkPotential; directory = pwd())   
-    return forward_pass(eatom,input, batchsize, nnparams.n_layers, nnparams.num_nodes, nnparams.activation_functions,nnparams.n_params, nnparams.parameters,directory)
+function forward_pass(eatom,input::AbstractArray,batchsize,nnparams::NeuralNetworkPotential)   
+    return forward_pass(eatom,input, batchsize, nnparams.n_layers, nnparams.num_nodes, nnparams.activation_functions,nnparams.n_params, nnparams.parameters)
 end
-function forward_pass( eatom,input::AbstractArray, batchsize, num_layers, num_nodes, activation_functions, num_parameters, parameters,directory)    
-    ccall( (:forward, "$(directory)/librunnerjulia.so"),
+function forward_pass( eatom,input::AbstractArray, batchsize, num_layers, num_nodes, activation_functions, num_parameters, parameters)    
+    ccall( (:forward, "./librunnerjulia.so"),
     Float64,  (Ref{Float64},Ref{Int32}, Ref{Int32}, Ref{Int32}, Ref{Int32},
     Ref{Int32}, Ref{Float64}, Ref{Int32}, Ref{Float64}),
     input, num_nodes[1], num_layers, num_nodes, batchsize,

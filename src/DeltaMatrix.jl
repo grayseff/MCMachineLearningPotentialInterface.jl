@@ -9,7 +9,7 @@ using ..SymmetryFunctions
 
 using StaticArrays,LinearAlgebra
 
-export total_symm!,symmetry_calculation!
+export total_symm!,symmetry_calculation!,total_thr_symm!
 
 #-------------------------------------------------------------------#
 #-------------------------Adjust Functions--------------------------#
@@ -144,7 +144,13 @@ function total_symm!(g_matrix,position,new_position,dist2_matrix,new_dist_vector
 
     return g_matrix
 end
+function total_thr_symm!(g_matrix,position,new_position,dist2_matrix,new_dist_vector,f_matrix,new_f_vector,atomindex,total_symmetry_vector)
+    Threads.@threads for g_index in eachindex(total_symmetry_vector)
+        g_matrix[g_index,:] = symmetry_calculation!(g_matrix[g_index,:],atomindex,new_position,position,dist2_matrix,new_dist_vector,f_matrix,new_f_vector,total_symmetry_vector[g_index])
+    end
 
+    return g_matrix
+end
 
 
 end

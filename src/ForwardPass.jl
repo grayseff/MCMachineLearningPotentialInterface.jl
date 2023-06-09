@@ -44,10 +44,10 @@ function forward_pass(input::AbstractArray,batchsize,nnparams::NeuralNetworkPote
     return forward_pass(input, batchsize, nnparams.n_layers, nnparams.num_nodes, nnparams.activation_functions,nnparams.n_params, nnparams.parameters,directory)
 end
 function forward_pass(eatom,input::AbstractArray,batchsize,nnparams::NeuralNetworkPotential; directory = pwd())   
-    return forward_pass(eatom,input, batchsize, nnparams.n_layers, nnparams.num_nodes, nnparams.activation_functions,nnparams.n_params, nnparams.parameters,dir)
+    return forward_pass(eatom,input, batchsize, nnparams.n_layers, nnparams.num_nodes, nnparams.activation_functions,nnparams.n_params, nnparams.parameters,directory)
 end
-function forward_pass( eatom,input::AbstractArray, batchsize, num_layers, num_nodes, activation_functions, num_parameters, parameters,dir)    
-    ccall( (:forward, "$(dir)/librunnerjulia.so"),
+function forward_pass( eatom,input::AbstractArray, batchsize, num_layers, num_nodes, activation_functions, num_parameters, parameters,directory)    
+    ccall( (:forward, "$(directory)/librunnerjulia.so"),
     Float64,  (Ref{Float64},Ref{Int32}, Ref{Int32}, Ref{Int32}, Ref{Int32},
     Ref{Int32}, Ref{Float64}, Ref{Int32}, Ref{Float64}),
     input, num_nodes[1], num_layers, num_nodes, batchsize,

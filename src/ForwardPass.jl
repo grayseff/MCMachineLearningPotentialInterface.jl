@@ -17,8 +17,7 @@ struct NeuralNetworkPotential
     activation_functions::Vector
     parameters::Vector
 end
-function NeuralNetworkPotential(num_nodes::Vector,activation_functions::Vector, parameters)
-    
+function NeuralNetworkPotential(num_nodes::Vector,activation_functions::Vector, parameters)    
     return NeuralNetworkPotential(length(num_nodes),length(parameters),num_nodes,activation_functions,parameters)
 end
 """

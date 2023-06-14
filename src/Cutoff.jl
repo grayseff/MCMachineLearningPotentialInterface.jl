@@ -31,7 +31,7 @@ function angular_measure(a,b,c,r2ab,r2ac)
     return θ
 end
 function angular_measure(a,b,c)
-    r2_ab,r2_ac,r2_bc = distance2(a,b),distance2(a,c),distance2(b,c)
+    r2_ab,r2_ac,r2_bc = dist2(a,b),dist2(a,c),dist2(b,c)
     θ = angular_measure(a,b,c,r2_ab,r2_ac)   
     return θ,r2_ab,r2_ac,r2_bc
 end

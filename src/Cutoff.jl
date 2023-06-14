@@ -15,12 +15,12 @@ export cutoff_function
     distance2(a,b)
 squared distance of two vectors `a` `b` 
 """
-distance2(a,b) = (a-b)⋅(a-b)
+dist2(a,b) = (a-b)⋅(a-b)
 """
     find_distance2_mat_distance2_mat(pos)
 given a vector called `pos` comprised of (ideally) static vectors we return a lengthXlength symmetric matrix of the squared distance
 """
-find_distance2_mat(pos) = [distance2(a,b) for a in pos, b in pos]
+find_distance2_mat(pos) = [dist2(a,b) for a in pos, b in pos]
 """
     angular_measure(a,b,c,r2ij,r2ik)
     angular_measure(a,b,c)

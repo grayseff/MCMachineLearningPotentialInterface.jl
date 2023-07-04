@@ -1,6 +1,6 @@
-using MachineLearningPotential
+using MCMachineLearningPotentialInterface
 using Test
 
-@testset "MachineLearningPotential.jl" begin
+@testset "MCMachineLearningPotentialInterface.jl" begin
     # Write your tests here.
 end

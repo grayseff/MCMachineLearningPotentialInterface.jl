@@ -1,4 +1,4 @@
-name = "MachineLearningPotential"
+name = "MCMachineLearningPotentialInterface"
 uuid = "3c6de921-4f95-4537-8999-82f6d8a5f170"
 authors = ["Gray Hunter"]
 version = "1.0.0"

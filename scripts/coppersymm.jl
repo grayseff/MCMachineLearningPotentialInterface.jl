@@ -1,4 +1,4 @@
-using MachineLearningPotential
+using MCMachineLearningPotentialInterface
 
 
 X = [ 1    1              0.001   0.000  11.338
